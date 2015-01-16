@@ -408,6 +408,7 @@ static bool DigitGen(DiyFp low,
   // with the divisor exponent + 1. And the divisor is the biggest power of ten
   // that is smaller than integrals.
   while (*kappa > 0) {
+	  if (divisor == 0) return false;
     int digit = integrals / divisor;
     buffer[*length] = '0' + digit;
     (*length)++;
