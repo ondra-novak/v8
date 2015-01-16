@@ -211,7 +211,7 @@ char* DoubleToFixedCString(double value, int f) {
   // use the non-fixed conversion routine.
   if (abs_value >= kFirstNonFixed) {
     char arr[100];
-    Vector<char> buffer(arr, ARRAY_SIZE(arr));
+    Vector<char> buffer(arr, arraysize(arr));
     return StrDup(DoubleToCString(value, buffer));
   }
 
@@ -441,7 +441,13 @@ char* DoubleToRadixCString(double value, int radix) {
   int integer_pos = kBufferSize - 2;
   do {
     double remainder = std::fmod(integer_part, radix);
-    integer_buffer[integer_pos--] = chars[static_cast<int>(remainder)];
+	int index = static_cast<int>(remainder);
+	DCHECK(index < sizeof(chars));
+	if (index >= sizeof(chars)) {
+		//serious BUG, please fix it in the future!!!!
+		break;
+	}
+    integer_buffer[integer_pos--] = chars[index];
     integer_part -= remainder;
     integer_part /= radix;
   } while (integer_part >= 1.0);
@@ -490,7 +496,7 @@ double StringToDouble(UnicodeCache* unicode_cache,
   DisallowHeapAllocation no_gc;
   String::FlatContent flat = string->GetFlatContent();
   // ECMA-262 section 15.1.2.3, empty string is NaN
-  if (flat.IsAscii()) {
+  if (flat.IsOneByte()) {
     return StringToDouble(
         unicode_cache, flat.ToOneByteVector(), flags, empty_string_val);
   } else {
